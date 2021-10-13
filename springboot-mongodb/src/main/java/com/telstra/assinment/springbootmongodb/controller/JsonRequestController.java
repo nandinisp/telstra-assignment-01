@@ -3,10 +3,12 @@ package com.telstra.assinment.springbootmongodb.controller;
 import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
 import com.telstra.assinment.springbootmongodb.service.JsonRequestService;
 import com.telstra.assinment.springbootmongodb.validation.JsonRequestValidation;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/jsonrequestprocessor")
+@RequestMapping("/api")
 public class JsonRequestController {
 
     private final JsonRequestService jsonRequestService;
@@ -17,13 +19,24 @@ public class JsonRequestController {
         this.jsonRequestValidation = jsonRequestValidation;
     }
 
+    @GetMapping("/get")
+    public ResponseEntity<String> getAllTutorials(@RequestParam(required = false) String title) {
+        return new ResponseEntity<String>("Hi Welcome", HttpStatus.OK);
+    }
 
-    @PostMapping
-    public void addExpense(@RequestBody JsonMessageRequest jsonMessageRequest) {
-        //Doing validation
-        boolean requestValid = jsonRequestValidation.isValid(jsonMessageRequest);
-        if(requestValid) {
-            jsonRequestService.addJsonRequest(jsonMessageRequest);
+    @PostMapping("/jsonrequestprocessor")
+    public ResponseEntity<Integer> addExpense(@RequestBody JsonMessageRequest jsonMessageRequest) {
+        try {
+            //Doing validation
+            boolean requestValid = jsonRequestValidation.isValid(jsonMessageRequest);
+            if (requestValid) {
+                Integer generatedId = jsonRequestService.addJsonRequest(jsonMessageRequest);
+                return new ResponseEntity<>(generatedId, HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>(0, HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

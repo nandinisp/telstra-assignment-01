@@ -8,6 +8,7 @@ class SpringbootMongodbApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

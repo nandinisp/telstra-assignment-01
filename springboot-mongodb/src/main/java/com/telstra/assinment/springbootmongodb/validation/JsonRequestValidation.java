@@ -1,10 +1,12 @@
 package com.telstra.assinment.springbootmongodb.validation;
 
 import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
+@Component
 public class JsonRequestValidation {
 
     public boolean isValid(JsonMessageRequest input)
