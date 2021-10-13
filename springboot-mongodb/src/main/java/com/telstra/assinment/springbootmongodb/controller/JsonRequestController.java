@@ -20,12 +20,12 @@ public class JsonRequestController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<String> getAllTutorials(@RequestParam(required = false) String title) {
+    public ResponseEntity<String> getWelcomeMessage(@RequestParam(required = false) String title) {
         return new ResponseEntity<String>("Hi Welcome", HttpStatus.OK);
     }
 
     @PostMapping("/jsonrequestprocessor")
-    public ResponseEntity<Integer> addExpense(@RequestBody JsonMessageRequest jsonMessageRequest) {
+    public ResponseEntity<Integer> requestProcess(@RequestBody JsonMessageRequest jsonMessageRequest) {
         try {
             //Doing validation
             boolean requestValid = jsonRequestValidation.isValid(jsonMessageRequest);
