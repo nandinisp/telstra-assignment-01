@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.lang.model.type.NullType;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class JsonRequestController {
@@ -19,24 +22,39 @@ public class JsonRequestController {
         this.jsonRequestValidation = jsonRequestValidation;
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<String> getWelcomeMessage(@RequestParam(required = false) String title) {
-        return new ResponseEntity<String>("Hi Welcome", HttpStatus.OK);
-    }
-
+    //a) Store the JSON request in MongoDB
     @PostMapping("/jsonrequestprocessor")
     public ResponseEntity<Integer> requestProcess(@RequestBody JsonMessageRequest jsonMessageRequest) {
         try {
             //Doing validation
-            boolean requestValid = jsonRequestValidation.isValid(jsonMessageRequest);
-            if (requestValid) {
+            boolean isValid = jsonRequestValidation.Validate(jsonMessageRequest);
+            if (isValid) {
+                //Transforming Data
+                jsonRequestValidation.transformData(jsonMessageRequest);
                 Integer generatedId = jsonRequestService.addJsonRequest(jsonMessageRequest);
                 return new ResponseEntity<>(generatedId, HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>(0, HttpStatus.BAD_REQUEST);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //d) Store the results of the above methods in a MongoDB
+    @GetMapping("/getall")
+    public ResponseEntity<List<JsonMessageRequest>> getAll(@RequestParam(required = false) String title) {
+
+        try {
+            List<JsonMessageRequest> lstJsonMessageRequest = jsonRequestService.getAll();
+
+            if (lstJsonMessageRequest.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(lstJsonMessageRequest, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

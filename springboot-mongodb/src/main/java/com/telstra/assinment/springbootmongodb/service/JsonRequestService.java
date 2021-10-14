@@ -3,6 +3,8 @@ import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
 import com.telstra.assinment.springbootmongodb.repository.JsonMessageRequestRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class JsonRequestService {
 
@@ -15,5 +17,9 @@ public class JsonRequestService {
     public Integer addJsonRequest(JsonMessageRequest jsonMessageRequest) {
         jsonMessageRequestRepository.save(jsonMessageRequest);
         return jsonMessageRequest.getId();
+    }
+
+    public List<JsonMessageRequest> getAll() {
+       return jsonMessageRequestRepository.findAll();
     }
 }

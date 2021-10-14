@@ -4,15 +4,45 @@ import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Component
 public class JsonRequestValidation {
 
-    public boolean isValid(JsonMessageRequest input)
-    {
-        boolean hasDuplicates=false;
+    //Validate the data types of the incoming JSON request.
+    public boolean Validate(JsonMessageRequest jsonMessageRequest) {
 
+        if(jsonMessageRequest == null)
+        {
+            return false;
+        }
+        else
+        {
+            if(jsonMessageRequest.getWhiteSpacesGalore() == null || jsonMessageRequest.getWhiteSpacesGalore().equals("")) {
+                return false;
+            }
+            else if(jsonMessageRequest.getFindDuplicates() == null || jsonMessageRequest.getFindDuplicates().equals("")) {
+                return false;
+            }
+            else if(jsonMessageRequest.getNumbersMeetNumbers() == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
+    a) Store the JSON request in MongoDB (refer to below incoming request sample using "id":"{{$randomInt}}") into:
+    --> An “incoming” collection
+    b) Validate the data types of the incoming JSON request. (string, boolean, integer)
+    c) Build the following methods to manage the data and store the results in a MongoDB “outgoing” collection:
+    --> Select the largest number from the array “numbersMeetNumbers”
+    --> Find any duplicates in the string “findDuplicates”
+    --> Remove whitespaces from “whiteSpacesGalore” without using replace()
+     */
+    public void transformData(JsonMessageRequest input)
+    {
         //generating unique id
         input.setId(generateUniqueId());
 
@@ -25,7 +55,9 @@ public class JsonRequestValidation {
         //Removing white space assigning back
         input.setWhiteSpacesGalore(RemoveWhiteSpace(input.getWhiteSpacesGalore()));
 
-        return true;
+        int largestNumber = FindLargestNumber(input.getNumbersMeetNumbers());
+
+        input.setLargestNumber(largestNumber);
     }
 
     //Generating unique id
@@ -41,97 +73,53 @@ public class JsonRequestValidation {
     // Remove whitespaces without using replace()
     private String RemoveWhiteSpace(String inputString)
     {
-        boolean searchPerformed = false;
-        boolean whitespaceFound = false;
-        String methodResult = null;
-        String[]  whitespaceSubstrings = inputString.split("\\s+");
+        String result ="";
 
-        if (whitespaceSubstrings.length>0)
-        {
-            // Remove whitespace.
-            methodResult = loopWhitespaceRemoval(inputString, whitespaceSubstrings);
-        }
-        else
-        {
-            // No whitespace found - Return original.
-            methodResult = inputString;
+        Scanner sc = new Scanner(inputString);
+
+        while(sc.hasNext()) {
+            result += sc.next();
         }
 
-        return methodResult;
+        return result;
     }
 
-    // Loops whitespace substrings.
-    private String loopWhitespaceRemoval(String inpString,String[] wsArr)
-    {
-        int matchIndex = 0;			// Substring index.
-        int startPoint = 0;			// Index within full string.
 
-        String currentMatch = "";
-        int currentCutoff = -1;
-        String currentSafeText = "";
-
-        String textRes = "";
-
-        for (matchIndex = 0; matchIndex < wsArr.length; matchIndex = matchIndex + 1)
-        {
-            // Read current whitespace and find location.
-            currentMatch = wsArr[matchIndex];
-            currentCutoff = inpString.indexOf(currentMatch, startPoint);
-            currentSafeText = "";
-
-            // Whitespace exists.
-            if (currentCutoff >= startPoint && currentCutoff < inpString.length())
-            {
-                // Substring text until whitespace. Add to result.
-                currentSafeText = inpString.substring(startPoint, currentCutoff);
-                textRes += currentSafeText;
-
-                // Skip whitespace.
-                startPoint = currentCutoff + currentMatch.length();
-            }
-        }
-
-        // Add final substring to result.
-        textRes += inpString.substring(startPoint);
-        return textRes;
-    }
 
     // Find any duplicates in the string “findDuplicates”
     private ArrayList<Character> FindDuplicates(String inputString)
     {
 
         ArrayList<Character> methodResult = new ArrayList<Character>();
+        int count;
+        //Converts given string into character array
+        char inputStringArray[] = inputString.toCharArray();
 
-        methodResult = loopCharacters(inputString);
+
+        //Counts each character present in the string
+        for(int i = 0; i <inputStringArray.length; i++) {
+            count = 1;
+            for(int j = i+1; j <inputStringArray.length; j++) {
+                if(inputStringArray[i] == inputStringArray[j] && inputStringArray[i] != ' ') {
+                    count++;
+                    //Set string[j] to 0 to avoid printing visited character
+                    inputStringArray[j] = '0';
+                }
+            }
+            //A character is considered as duplicate if count is greater than 1
+            if(count > 1 && inputStringArray[i] != '0') {
+                methodResult.add(inputStringArray[i]);
+            }
+        }
 
         return methodResult;
     }
 
-    // Loop string characters to find duplicates.
-    private ArrayList<Character> loopCharacters(String inpStr)
-    {
-        int charIndex = 0;
-        char currentChar;
-        int currentDuplicate = -1;
-        boolean currentUsed = false;
-
-
-        ArrayList<Character> dupeRes = new ArrayList<Character>();
-
-
-        for (charIndex = 0; charIndex < inpStr.length(); charIndex = charIndex + 1)
-        {
-            currentChar = inpStr.charAt(charIndex);
-            currentDuplicate = inpStr.indexOf(currentChar, charIndex + 1);	// Search rest of string for char.
-            currentUsed = dupeRes.contains(currentChar);
-
-            // Character used again in rest of string, hasn't already been noted.
-            if (currentDuplicate > charIndex && currentDuplicate < inpStr.length() && currentUsed != true)
-            {
-                dupeRes.add(currentChar);
-            }
-        }
-
-        return dupeRes;
+    private int FindLargestNumber(int [] inputIntArray) {
+        int size = inputIntArray.length;
+        Arrays.sort(inputIntArray);
+        int largestNumber = inputIntArray[size-1];
+        return largestNumber;
     }
+
 }
