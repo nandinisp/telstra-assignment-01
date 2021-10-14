@@ -1,8 +1,6 @@
 package com.telstra.assinment.springbootmongodb.validation;
-
 import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
 
 @Component

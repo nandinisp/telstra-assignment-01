@@ -2,7 +2,6 @@ package com.telstra.assinment.springbootmongodb.service;
 import com.telstra.assinment.springbootmongodb.model.JsonMessageRequest;
 import com.telstra.assinment.springbootmongodb.repository.JsonMessageRequestRepository;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 @Component
